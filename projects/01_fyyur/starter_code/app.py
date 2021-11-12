@@ -100,8 +100,19 @@ def index():
 def venues():
   current_time = datetime.now()
   data = []
-  all_areas = Venue.query.with_entities(Venue.city, Venue.state).group_by(Venue.city, Venue.state).all()
-  for area in all_areas:
+  # Generate list of all unique areas by City and State
+  # https://docs.sqlalchemy.org/en/14/orm/query.html?highlight=with_entities#sqlalchemy.orm.Query.with_entities
+  venue_areas = Venue.query.with_entities(Venue.city, Venue.state).all()
+  unique_areas = []
+  for area in venue_areas:
+    match = False
+    for unique_area in unique_areas:
+      if area == unique_area:
+        match = True
+    if match == False:
+      unique_areas.append(area)
+  # For each area, append all venues that correspond to it
+  for area in unique_areas:
     venue_data = []
     venues = Venue.query.all();
     for venue in venues:
@@ -121,7 +132,9 @@ def venues():
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
+  # Create a list of venues that match the search term provided
   data = []
+  # https://docs.python.org/3/library/datetime.html#datetime.datetime.now
   current_time = datetime.now()
   search = request.form.get('search_term', '')
   venues = Venue.query.filter(Venue.name.ilike("%"+search+"%")).all()
@@ -140,6 +153,8 @@ def search_venues():
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
+  # create a list of data for each possible venue, then serve the appropriate
+  # venue data to the template show_venue.html
   data1 = []
   try:
     venues = Venue.query.all()
@@ -199,6 +214,8 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
+  # After running checks on the form, try to commit to the database. If that
+  # fails, roll back the commit and close the session
   error = False
   form = VenueForm(request.form, meta={'csrf': False})
   if form.validate():
@@ -225,16 +242,17 @@ def create_venue_submission():
       db.session.close()
   else:
     error = True
-    message = []
-    for field, err in form.errors.items():
-      message.append(field + ' ' + '|'.join(err))
-    flash('Errors ' + str(message))
+    errors = 'Errors: '
+    for err in form.errors.items():
+      errors += err[1][0]
+    flash(errors)
   if error == False:
     flash('Venue ' + form.name.data + ' was successfully listed!')
   return render_template('pages/home.html')
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
+  # Delete the specified venue
   try:
     venue = Venue.query.filter_by(id=venue_id).first()
     db.session.delete(venue)
@@ -251,6 +269,7 @@ def delete_venue(venue_id):
 #  ----------------------------------------------------------------
 @app.route('/artists')
 def artists():
+  # Display the artists stored in the database
   data = []
   artists = Artist.query.all()
   for artist in artists:
@@ -262,6 +281,7 @@ def artists():
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
+  # Display all artists that match the search field, without case sensitivity
   data = []
   current_time = datetime.now()
   search = request.form.get('search_term', '')
@@ -281,6 +301,8 @@ def search_artists():
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
+  # create a list of data for each possible artist, then serve the appropriate
+  # artist data to the template show_artist.html
   data1 = []
   try:
     artists = Artist.query.all()
@@ -297,14 +319,14 @@ def show_artist(artist_id):
             "venue_id": show.venue_id,
             "venue_name": venue.name,
             "venue_image_link": venue.image_link,
-            "start_time": show.date_time.strftime("%d/%m/%Y, %H:%M")
+            "start_time": show.date_time.strftime("%d/%m/%Y, %H:%M:%S")
           })
         else:
           past_shows.append({
             "venue_id": show.venue_id,
             "venue_name": venue.name,
             "venue_image_link": venue.image_link,
-            "start_time": show.date_time.strftime("%d/%m/%Y, %H:%M")
+            "start_time": show.date_time.strftime("%d/%m/%Y, %H:%M:%S")
           })
       data1.append({
         "id": artist.id,
@@ -333,6 +355,7 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
+  # Retrieve existing data, and populate the form with it
   form = ArtistForm()
   try:
     artist = Artist.query.filter_by(id=artist_id).first()
@@ -370,6 +393,8 @@ def edit_artist(artist_id):
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
+  # After running checks on the form, try to commit to the database. If that
+  # fails, roll back the commit and close the session
   form = ArtistForm(meta={'csrf': False})
   if form.validate():
     try:
@@ -392,14 +417,15 @@ def edit_artist_submission(artist_id):
     finally:
       db.session.close()
   else:
-    message = []
-    for field, err in form.errors.items():
-      message.append(field + ' ' + '|'.join(err))
-    flash('Errors ' + str(message))
+    errors = 'Errors: '
+    for err in form.errors.items():
+      errors += err[1][0]
+    flash(errors)
   return redirect(url_for('show_artist', artist_id=artist_id))
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
+  # Retrieve existing data, and populate the form with it
   form = VenueForm()
   try:
     venue = Venue.query.filter_by(id=venue_id).first()
@@ -435,6 +461,8 @@ def edit_venue(venue_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
+  # After running checks on the form, try to commit to the database. If that
+  # fails, roll back the commit and close the session
   form = VenueForm(meta={'csrf': False})
   if form.validate():
     try:
@@ -458,10 +486,10 @@ def edit_venue_submission(venue_id):
     finally:
       db.session.close()
   else:
-    message = []
-    for field, err in form.errors.items():
-      message.append(field + ' ' + '|'.join(err))
-    flash('Errors ' + str(message))
+    errors = 'Errors: '
+    for err in form.errors.items():
+      errors += err[1][0]
+    flash(errors)
   return redirect(url_for('show_venue', venue_id=venue_id))
 
 #  Create Artist
@@ -474,6 +502,8 @@ def create_artist_form():
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
+  # After running checks on the form, try to commit to the database. If that
+  # fails, roll back the commit and close the session
   form = ArtistForm(request.form, meta={'csrf': False})
   error = False
   if form.validate():
@@ -499,10 +529,10 @@ def create_artist_submission():
       db.session.close()
   else:
     error = True
-    message = []
-    for field, err in form.errors.items():
-      message.append(field + ' ' + '|'.join(err))
-    flash('Errors ' + str(message))
+    errors = 'Errors: '
+    for err in form.errors.items():
+      errors += err[1][0]
+    flash(errors)
   if error == False:
     flash('Artist ' + form.name.data + ' was successfully listed!')
   return render_template('pages/home.html')
@@ -513,6 +543,7 @@ def create_artist_submission():
 
 @app.route('/shows')
 def shows():
+  # Display all shows stored in the database
   data = []
   try:
     shows = Show.query.all()
@@ -525,7 +556,7 @@ def shows():
         "artist_id": show.artist_id,
         "artist_name": artist.name,
         "artist_image_link": artist.image_link,
-        "start_time": show.date_time.strftime("%d/%m/%Y, %H:%M")
+        "start_time": show.date_time.strftime("%d/%m/%Y, %H:%M:%S")
       })
   except Exception as e:
     flash(e)
@@ -540,20 +571,29 @@ def create_shows():
 
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
+  # After running checks on the form, try to commit to the database. If that
+  # fails, roll back the commit and close the session
   error = False
-  form = ShowForm(request.form)
-  try:
-    show = Show(artist_id=form.artist_id.data,
-      venue_id=form.venue_id.data,
-      date_time=form.start_time.data)
-    db.session.add(show)
-    db.session.commit()
-  except:
+  form = ShowForm(request.form, meta={'csrf': False})
+  if form.validate():
+    try:
+      show = Show(artist_id=form.artist_id.data,
+        venue_id=form.venue_id.data,
+        date_time=form.start_time.data)
+      db.session.add(show)
+      db.session.commit()
+    except:
+      error = True
+      flash('An error occurred. Show could not be listed.')
+      db.session.rollback()
+    finally:
+      db.session.close()
+  else:
     error = True
-    flash('An error occurred. Show could not be listed.')
-    db.session.rollback()
-  finally:
-    db.session.close()
+    errors = 'Errors: '
+    for err in form.errors.items():
+      errors += err[1][0]
+    flash(errors)
   if error == False:
     flash('Show was successfully listed!')
   return render_template('pages/home.html')
