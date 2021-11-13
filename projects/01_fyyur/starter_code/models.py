@@ -1,25 +1,9 @@
-"""from flask import Flask
-from flask_sqlalchemy import SQLAlchemy"""
+# Correct setup found on this website:
+# https://stackoverflow.com/questions/9692962/flask-sqlalchemy-import-context-issue/9695045#9695045
 
-import json
-import dateutil.parser
-import babel
-from flask import Flask, render_template, request, Response, flash, redirect, url_for
-from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
-import logging
-from logging import Formatter, FileHandler
-from flask_wtf import Form
-from forms import *
-from flask_migrate import Migrate
-from datetime import datetime
 
-app = Flask(__name__)
-moment = Moment(app)
-app.config.from_object('config')
-db = SQLAlchemy(app)
-
-migrate = Migrate(app, db)
+db = SQLAlchemy()
 
 class Venue(db.Model):
   __tablename__ = 'venues'

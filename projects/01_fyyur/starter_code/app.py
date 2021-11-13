@@ -7,7 +7,7 @@ import dateutil.parser
 import babel
 from flask import Flask, render_template, request, Response, flash, redirect, url_for
 from flask_moment import Moment
-from flask_sqlalchemy import SQLAlchemy
+# from flask_sqlalchemy import SQLAlchemy
 import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
@@ -23,55 +23,16 @@ from models import *
 app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
-db = SQLAlchemy(app)
+db.init_app(app)
 
 migrate = Migrate(app, db)
 
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
-"""
-class Venue(db.Model):
-  __tablename__ = 'venues'
 
-  id = db.Column(db.Integer, primary_key=True)
-  name = db.Column(db.String(120), nullable=False)
-  city = db.Column(db.String(120), nullable=False)
-  state = db.Column(db.String(120), nullable=False)
-  address = db.Column(db.String(120), nullable=False)
-  phone = db.Column(db.String(120), nullable=False)
-  genres = db.Column(db.ARRAY(db.String), nullable=False)
-  image_link = db.Column(db.String(500), nullable=False)
-  facebook_link = db.Column(db.String(120), nullable=False)
-  website_link = db.Column(db.String(120), nullable=False)
-  looking_for_talent = db.Column(db.Boolean, nullable=False, default=False)
-  seeking_description = db.Column(db.String(500), nullable=False)
-  shows = db.relationship('Show', backref='venue', lazy="joined")
+# Imported from models.py
 
-class Artist(db.Model):
-  __tablename__ = 'artists'
-
-  id = db.Column(db.Integer, primary_key=True)
-  name = db.Column(db.String(120), nullable=False)
-  city = db.Column(db.String(120), nullable=False)
-  state = db.Column(db.String(120), nullable=False)
-  phone = db.Column(db.String(120), nullable=False)
-  genres = db.Column(db.ARRAY(db.String), nullable=False)
-  image_link = db.Column(db.String(500), nullable=False)
-  facebook_link = db.Column(db.String(120), nullable=False)
-  website_link = db.Column(db.String(120), nullable=False)
-  looking_for_venues = db.Column(db.Boolean, nullable=False, default=False)
-  seeking_description = db.Column(db.String(500), nullable=False)
-  shows = db.relationship('Show', backref='artist', lazy="joined")
-
-class Show(db.Model):
-  __tablename__ = 'shows'
-
-  id = db.Column(db.Integer, primary_key=True)
-  artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'), nullable=False)
-  venue_id = db.Column(db.Integer, db.ForeignKey('venues.id'), nullable=False)
-  date_time = db.Column(db.DateTime, nullable=False)
-"""
 #----------------------------------------------------------------------------#
 # Filters.
 #----------------------------------------------------------------------------#
@@ -162,11 +123,10 @@ def show_venue(venue_id):
     venues = Venue.query.all()
     current_time = datetime.now()
     for venue in venues:
-      flash(venue.name)
       past_shows = []
       upcoming_shows = []
       # Join statement
-      shows = venue.shows
+      shows = Show.query.filter_by(venue_id=venue.id).join(Venue).all()
       for show in shows:
         artist = Artist.query.filter_by(id=show.artist_id).first()
         if show.date_time > current_time:
@@ -314,7 +274,7 @@ def show_artist(artist_id):
       past_shows = []
       upcoming_shows = []
       # Join statement
-      shows = artist.shows
+      shows = Show.query.filter_by(artist_id=artist.id).join(Artist).all()
       for show in shows:
         venue = Venue.query.filter_by(id=show.venue_id).first()
         if show.date_time > current_time:
@@ -470,7 +430,6 @@ def edit_venue_submission(venue_id):
   if form.validate():
     try:
       venue = Venue.query.filter_by(id=venue_id).first()
-      flash("Venue name prior to being set as the new value: "+venue.name)
       venue.name = form.name.data
       venue.city = form.city.data
       venue.state = form.state.data
@@ -483,7 +442,6 @@ def edit_venue_submission(venue_id):
       venue.looking_for_talent = form.seeking_talent.data
       venue.seeking_description = form.seeking_description.data
       db.session.commit()
-      flash("Venue name after session has been commited: "+venue.name)
     except Exception as e:
       db.session.rollback()
       flash(e)
@@ -496,7 +454,6 @@ def edit_venue_submission(venue_id):
       errors += err[1][0]
     flash(errors)
   venue = Venue.query.filter_by(id=venue_id).first()
-  flash("Venue name right before returning the redirect to the show_venue page (fresh query): "+venue.name)
   return redirect(url_for('show_venue', venue_id=venue_id))
 
 #  Create Artist
