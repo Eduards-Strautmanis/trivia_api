@@ -14,6 +14,8 @@ from flask_wtf import Form
 from forms import *
 from flask_migrate import Migrate
 from datetime import datetime
+from models import *
+
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -28,7 +30,7 @@ migrate = Migrate(app, db)
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
-
+"""
 class Venue(db.Model):
   __tablename__ = 'venues'
 
@@ -69,7 +71,7 @@ class Show(db.Model):
   artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'), nullable=False)
   venue_id = db.Column(db.Integer, db.ForeignKey('venues.id'), nullable=False)
   date_time = db.Column(db.DateTime, nullable=False)
-
+"""
 #----------------------------------------------------------------------------#
 # Filters.
 #----------------------------------------------------------------------------#
@@ -160,6 +162,7 @@ def show_venue(venue_id):
     venues = Venue.query.all()
     current_time = datetime.now()
     for venue in venues:
+      flash(venue.name)
       past_shows = []
       upcoming_shows = []
       # Join statement
@@ -467,6 +470,7 @@ def edit_venue_submission(venue_id):
   if form.validate():
     try:
       venue = Venue.query.filter_by(id=venue_id).first()
+      flash("Venue name prior to being set as the new value: "+venue.name)
       venue.name = form.name.data
       venue.city = form.city.data
       venue.state = form.state.data
@@ -479,6 +483,7 @@ def edit_venue_submission(venue_id):
       venue.looking_for_talent = form.seeking_talent.data
       venue.seeking_description = form.seeking_description.data
       db.session.commit()
+      flash("Venue name after session has been commited: "+venue.name)
     except Exception as e:
       db.session.rollback()
       flash(e)
@@ -490,6 +495,8 @@ def edit_venue_submission(venue_id):
     for err in form.errors.items():
       errors += err[1][0]
     flash(errors)
+  venue = Venue.query.filter_by(id=venue_id).first()
+  flash("Venue name right before returning the redirect to the show_venue page (fresh query): "+venue.name)
   return redirect(url_for('show_venue', venue_id=venue_id))
 
 #  Create Artist
