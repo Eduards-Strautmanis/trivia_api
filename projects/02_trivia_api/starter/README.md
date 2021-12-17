@@ -9,15 +9,18 @@ This is an application for playing a quiz game. There are 6 categories: Science,
 To set up the project for local development for yourself, first clone this GitHub directory. As a prerequisite, Python3, Node, and pip must be installed on your computer.
 
 First, start a virtual environment by navigating to the starter folder and running
+
 `
 python3 -m venv env
 source env/bin/activate
 `
+
 If you don't have virtual environment, you can install it by running `python3 -m pip install --user virtualenv`
 
 # Backend
 
 To install the dependencies, navigate to the backend folder, then run
+
 `
 bash
 pip install -r requirements.txt
