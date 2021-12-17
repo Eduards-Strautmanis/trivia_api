@@ -10,10 +10,10 @@ To set up the project for local development for yourself, first clone this GitHu
 
 First, start a virtual environment by navigating to the starter folder and running
 
-`
+```
 python3 -m venv env
 source env/bin/activate
-`
+```
 
 If you don't have virtual environment, you can install it by running `python3 -m pip install --user virtualenv`
 
@@ -21,37 +21,37 @@ If you don't have virtual environment, you can install it by running `python3 -m
 
 To install the dependencies, navigate to the backend folder, then run
 
-`
+```
 bash
 pip install -r requirements.txt
-`
+```
 
 To start the backend, in the backend folder, run these commands:
 
-`
+```
 export FLASK_APP=flaskr
 export FLASK_ENV=development
 flask run
-`
+```
 
 The backend will by default be running on localhost:5000
 
 To restore the database, with Postgres running, run
 
-`
+```
 bash
 psql trivia < trivia.psql
-`
+```
 
 # Frontend
 
 To install the dependencies and then start the frontend, run these commands:
 
-`
+```
 bash
 npm install
 npm start
-`
+```
 
 The frontend will by default be running on localhost:3000
 
@@ -59,12 +59,12 @@ The frontend will by default be running on localhost:3000
 
 To run the tests, navigate to the backend folder and run the following commands:
 
-`
+```
 dropdb trivia_test
 createdb trivia_test
 psql trivia_test < books.psql
 python test_flaskr.py
-`
+```
 
 ### API Reference
 
@@ -79,13 +79,13 @@ At present, this API does not have authentication or API keys.
 
 This API returns errors in a standardized JSON format:
 
-`
+```
 {
   "success": False,
   "error": 400,
   "message": "Bad request"
 }
-`
+```
 
 This project is set to return the following errors:
 400: Bad Request
@@ -100,7 +100,7 @@ This project is set to return the following errors:
   + Returns all categories as a dictionary where the key is the id of the category, as well as a success value
 * Sample: `curl http://127.0.0.1:5000/categories`
 
-`
+```
 {
   "categories":
     {
@@ -113,14 +113,14 @@ This project is set to return the following errors:
     },
   "success": True
 }
-`
+```
 
 #GET /questions
 * General:
   + Returns all questions, ordered by id, paginated by ten questions per page, as well as a success value, total number of questions, and all categories as a json dictionary.
 * Sample: `curl http://127.0.0.1:5000/questions`
 
-`
+```
 {
   "categories":
     {
@@ -153,25 +153,25 @@ This project is set to return the following errors:
   "success": true,
   "total_questions": 19
 }
-`
+```
 
 #DELETE /questions/{question_id}
 * General:
   + Deletes the question indicated by the provided id. Returns a success value.
 * Sample: `curl http://127.0.0.1:5000/questions/15`
 
-`
+```
 {
   "success": True
 }
-`
+```
 
 #POST /questions (searching for question)
 * General:
   + If a JSON form is provided with a search term, this endpoint will return all questions that match the search term string in a case insensitive manner, as well as a success value and length of total questions.
 * Sample: `curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{"searchTerm": "who"}' `
 
-`
+```
 {
   "questions":[
     {
@@ -199,25 +199,25 @@ This project is set to return the following errors:
   "success": true,
   "totalQuestions": 3
 }
-`
+```
 
 #POST /questions (posting a question)
 * General:
   + If a JSON form is provided with all the fields for creating a question, this endpoint will utilize Flask SQLAlchemy to add the new specified question to the database. It will return a success value
 * Sample: `curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d "{'question': 'What year was the first iPhone model released?','answer': '2007','category': 5,'difficulty': 2}"`
 
-`
+```
 {
   "success": True
 }
-`
+```
 
 #GET /categories/{category_id}/questions
 * General:
   + Returns all questions in the specified category, as well as a success value and length of total questions in that category.
 * Sample: `curl http://127.0.0.1:5000/categories/6/questions`
 
-`
+```
 {
   "questions": [
     {
@@ -238,20 +238,17 @@ This project is set to return the following errors:
   "success": true,
   "totalQuestions": 2
 }
-`
+```
 
 #POST /quizzes
 * General:
   + This endpoint takes a JSON dictionary of all questions that have already been shown to the player and returns a new question, whether in a specific category if provided, or from the pool of all questions (specified by setting quiz_category to 0). If there are no more new questions to be shown, `{"question": None}` will be returned.
 * Sample: `curl http://127.0.0.1:5000/quizzes -X POST -H "Content-Type: application/json" -d '{"quiz_category": 6, "previous_questions": [10]}' `
 
-`
+```
 {
-
   "question":
-
     {
-      
       "answer": "Uruguay",
       "category": 6,
       "difficulty": 4,
@@ -259,7 +256,7 @@ This project is set to return the following errors:
       "question": "Which country won the first ever soccer World Cup in 1930?"
     },
   "success": true}
-`
+```
 
 ## Deployment N/A
 
