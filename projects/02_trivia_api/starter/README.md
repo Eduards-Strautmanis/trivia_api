@@ -1,52 +1,255 @@
-# Full Stack API Final Project
+## Udacitrivia
 
+This is an application for playing a quiz game. There are 6 categories: Science, Art, Geography, History, Entertainment, and Sports. You can add your own questions, and play the game with only one category or all categories at once. It features a React frontend, which is powered by the backend API. All data is stored on a PostgreSQL server, and any update made to the frontend is immediately synced with the server.
 
-## Full Stack Trivia
+## Getting Started
 
-Udacity is invested in creating bonding experiences for its employees and students. A bunch of team members got the idea to hold trivia on a regular basis and created a webpage to manage the trivia app and play the game, but their API experience is limited and still needs to be built out.
+# Prerequisites
 
-That's where you come in! Help them finish the trivia app so they can start holding trivia and seeing who's the most knowledgeable of the bunch. The application must:
+To set up the project for local development for yourself, first clone this GitHub directory. As a prerequisite, Python3, Node, and pip must be installed on your computer.
 
-1. Display questions - both all questions and by category. Questions should show the question, category and difficulty rating by default and can show/hide the answer.
-2. Delete questions.
-3. Add questions and require that they include question and answer text.
-4. Search for questions based on a text query string.
-5. Play the quiz game, randomizing either all questions or within a specific category.
+First, start a virtual environment by navigating to the starter folder and running
+'''
+python3 -m venv env
+source env/bin/activate
+'''
+If you don't have virtual environment, you can install it by running '''python3 -m pip install --user virtualenv'''
 
-Completing this trivia app will give you the ability to structure plan, implement, and test an API - skills essential for enabling your future applications to communicate with others.
+# Backend
 
-## Starting and Submitting the Project
+To install the dependencies, navigate to the backend folder, then run
+'''
+bash
+pip install -r requirements.txt
+'''
 
-[Fork](https://help.github.com/en/articles/fork-a-repo) the [project repository](https://github.com/udacity/FSND/blob/master/projects/02_trivia_api/starter) and [Clone](https://help.github.com/en/articles/cloning-a-repository) your forked repository to your machine. Work on the project locally and make sure to push all your changes to the remote repository before submitting the link to your repository in the Classroom.
->Once you're ready, you can submit your project on the last page.
+To start the backend, in the backend folder, run these commands:
 
-## About the Stack
+'''
+export FLASK_APP=flaskr
+export FLASK_ENV=development
+flask run
+'''
 
-We started the full stack application for you. It is designed with some key functional areas:
+The backend will by default be running on localhost:5000
 
-### Backend
-The [./backend](https://github.com/udacity/FSND/blob/master/projects/02_trivia_api/starter/backend/README.md) directory contains a partially completed Flask and SQLAlchemy server. You will work primarily in `__init__.py` to define your endpoints and can reference models.py for DB and SQLAlchemy setup. These are the files you'd want to edit in the backend:
+To restore the database, with Postgres running, run
+'''
+bash
+psql trivia < trivia.psql
+'''
 
-1. *./backend/flaskr/`__init__.py`*
-2. *./backend/test_flaskr.py*
+# Frontend
 
+To install the dependencies and then start the frontend, run these commands:
 
-### Frontend
+'''
+bash
+npm install
+npm start
+'''
 
-The [./frontend](https://github.com/udacity/FSND/blob/master/projects/02_trivia_api/starter/frontend/README.md) directory contains a complete React frontend to consume the data from the Flask server. If you have prior experience building a frontend application, you should feel free to edit the endpoints as you see fit for the backend you design. If you do not have prior experience building a frontend application, you should read through the frontend code before starting and make notes regarding:
+The frontend will by default be running on localhost:3000
 
-1. What are the end points and HTTP methods the frontend is expecting to consume?
-2. How are the requests from the frontend formatted? Are they expecting certain parameters or payloads? 
+## Tests
 
-Pay special attention to what data the frontend is expecting from each API response to help guide how you format your API. The places where you may change the frontend behavior, and where you should be looking for the above information, are marked with `TODO`. These are the files you'd want to edit in the frontend:
+To run the tests, navigate to the backend folder and run the following commands:
 
-1. *./frontend/src/components/QuestionView.js*
-2. *./frontend/src/components/FormView.js*
-3. *./frontend/src/components/QuizView.js*
+'''
+dropdb trivia_test
+createdb trivia_test
+psql trivia_test < books.psql
+python test_flaskr.py
+'''
 
+### API Reference
 
-By making notes ahead of time, you will practice the core skill of being able to read and understand code and will have a simple plan to follow to build out the endpoints of your backend API. 
+This is an API for returning questions, among other things, for a quiz game. It is linked to a PostgreSQL server, and can return questions by category, give a new random question among all questions or amongst a specific category, as well as create and delete questions in the database.
 
+## Getting Started
 
+This API currently only runs locally, and thus, is hosted on localhost:5000. This would be the url used to communicate to the frontend.
+At present, this API does not have authentication or API keys.
 
->View the [README within ./frontend for more details.](./frontend/README.md)
+## Error Handling
+
+This API returns errors in a standardized JSON format:
+
+'''
+{
+  "success": False,
+  "error": 400,
+  "message": "Bad request"
+}
+'''
+
+This project is set to return the following errors:
+400: Bad Request
+404: Not Found
+405: Method Not Allowed
+422: Unprocessable
+
+## Endpoints
+
+#GET /categories
+* General:
+  + Returns all categories as a dictionary where the key is the id of the category, as well as a success value
+* Sample: '''curl http://127.0.0.1:5000/categories'''
+'''
+{
+  "categories":
+    {
+      "1": "Science",
+      "2": "Art",
+      "3": "Geography",
+      "4": "History",
+      "5": "Entertainment",
+      "6": "Sports"
+    },
+  "success": True
+}
+'''
+
+#GET /questions
+* General:
+  + Returns all questions, ordered by id, paginated by ten questions per page, as well as a success value, total number of questions, and all categories as a json dictionary.
+* Sample: '''curl http://127.0.0.1:5000/questions'''
+'''
+{
+  "categories":
+    {
+      "1": "Science",
+      "2": "Art",
+      "3": "Geography",
+      "4": "History",
+      "5": "Entertainment",
+      "6": "Sports"
+    },
+  "questions": [
+    {
+      "answer": "Apollo 13",
+      "category": 5,
+      "difficulty": 4,
+      "id": 2,
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    },
+
+    ...
+
+    {
+      "answer": "The Palace of Versailles",
+      "category": 3,
+      "difficulty": 3,
+      "id": 14,
+      "question": "In which royal palace would you find the Hall of Mirrors?"
+    }
+  ],
+  "success": true,
+  "total_questions": 19
+}
+'''
+
+#DELETE /questions/{question_id}
+* General:
+  + Deletes the question indicated by the provided id. Returns a success value.
+* Sample: '''curl http://127.0.0.1:5000/questions/15'''
+'''
+{
+  "success": True
+}
+'''
+
+#POST /questions (searching for question)
+* General:
+  + If a JSON form is provided with a search term, this endpoint will return all questions that match the search term string in a case insensitive manner, as well as a success value and length of total questions.
+* Sample: '''curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{"searchTerm": "who"}' '''
+'''
+{
+  "questions":[
+    {
+      "answer": "Maya Angelou",
+      "category": 4,
+      "difficulty": 2,
+      "id": 5,
+      "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+    },
+    {
+      "answer": "George Washington Carver",
+      "category": 4,
+      "difficulty": 2,
+      "id": 12,
+      "question": "Who invented Peanut Butter?"
+    },
+    {
+      "answer": "Alexander Fleming",
+      "category": 1,
+      "difficulty": 3,
+      "id": 21,
+      "question": "Who discovered penicillin?"
+    }
+  ],
+  "success": true,
+  "totalQuestions": 3
+}
+'''
+
+#POST /questions (posting a question)
+* General:
+  + If a JSON form is provided with all the fields for creating a question, this endpoint will utilize Flask SQLAlchemy to add the new specified question to the database. It will return a success value
+* Sample: '''curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d "{'question': 'What year was the first iPhone model released?','answer': '2007','category': 5,'difficulty': 2}"'''
+'''
+{
+  "success": True
+}
+'''
+
+#GET /categories/{category_id}/questions
+* General:
+  + Returns all questions in the specified category, as well as a success value and length of total questions in that category.
+* Sample: '''curl http://127.0.0.1:5000/categories/6/questions'''
+'''
+{
+  "questions": [
+    {
+      "answer": "Brazil",
+      "category": 6,
+      "difficulty": 3,
+      "id": 10,
+      "question": "Which is the only team to play in every soccer World Cup tournament?"
+    },
+    {
+      "answer": "Uruguay",
+      "category": 6,
+      "difficulty": 4,
+      "id": 11,
+      "question": "Which country won the first ever soccer World Cup in 1930?"
+    }
+  ],
+  "success": true,
+  "totalQuestions": 2
+}
+'''
+
+#POST /quizzes
+* General:
+  + This endpoint takes a JSON dictionary of all questions that have already been shown to the player and returns a new question, whether in a specific category if provided, or from the pool of all questions (specified by setting quiz_category to 0). If there are no more new questions to be shown, '''{"question": None}''' will be returned.
+* Sample: '''curl http://127.0.0.1:5000/quizzes -X POST -H "Content-Type: application/json" -d '{"quiz_category": 6, "previous_questions": [10]}' '''
+'''
+{
+  "question":
+    {
+      "answer": "Uruguay",
+      "category": 6,
+      "difficulty": 4,
+      "id": 11,
+      "question": "Which country won the first ever soccer World Cup in 1930?"
+    },
+  "success": true}
+'''
+
+## Deployment N/A
+
+## Authors
+
+Coach Caryn: Frontend, most of the backend
+Edward Strautmanis: The parts of the backend that had TODOs
